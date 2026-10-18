@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-Regular.otf"); font-weight: 400; }
+      @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-SemiBold.otf"); font-weight: 600; }
+      @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-Bold.otf"); font-weight: 700; }
+      @font-face { font-family: "Inter"; src: url("assets/fonts/Inter-ExtraBold.otf"); font-weight: 800; }
+      :root {
+        --bg: #06080d;
+        --ink: #f5f6f8;
+        --muted: #8b93a3;
+        --line: #2a3140;
+        --red: #ff453a;
+        --blue: #5ac8fa;
+        --green: #32d74b;
+        --amber: #ffd60a;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
+      #root { width: 100%; height: 100%; position: relative; font-family: "Inter", sans-serif; color: var(--ink); background: var(--bg); }
+      .clip { position: absolute; inset: 0; }
+      .inner { position: absolute; inset: 0; }
+      .abs { position: absolute; }
+      .center-x { left: 0; right: 0; display: flex; justify-content: center; text-align: center; }
+
+      #bg { background: radial-gradient(ellipse 900px 1100px at 50% 40%, #121a2b 0%, #06080d 70%); }
+      #bg .grid { position: absolute; inset: 0; opacity: 0.18;
+        background-image: linear-gradient(#1d2638 1px, transparent 1px), linear-gradient(90deg, #1d2638 1px, transparent 1px);
+        background-size: 90px 90px; }
+
+      .eyebrow { font-size: 32px; font-weight: 700; letter-spacing: 0.16em; color: var(--muted); }
+      .h1 { font-size: 84px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.08; }
+
+      /* subtitles */
+      .sub { position: absolute; left: 50px; right: 50px; top: 1380px; height: 230px; }
+      .subline { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0; }
+      .subline span { display: block; max-width: 960px; text-align: center; font-size: 50px; font-weight: 600; line-height: 1.3;
+        padding: 14px 30px; border-radius: 22px; background: rgba(4, 6, 10, 0.78); color: var(--ink); }
+
+      /* phone outline */
+      .phone { position: absolute; border: 6px solid #3a4152; border-radius: 64px; background: linear-gradient(160deg, #0f1522, #080b12); }
+      .phone .island { position: absolute; top: 22px; left: 50%; width: 110px; margin-left: -55px; height: 32px; border-radius: 20px; background: #000; }
+
+      /* scene 1 */
+      #s1-flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+      #s1-crash { top: 430px; font-size: 190px; font-weight: 800; color: var(--red); letter-spacing: -0.03em; }
+      #s1-signal { top: 760px; }
+      #s1-signal-label { top: 1010px; font-size: 44px; font-weight: 600; color: var(--muted); }
+      #s1-q { top: 1130px; font-size: 92px; font-weight: 800; }
+
+      /* scene 2 */
+      #s2-eyebrow { top: 230px; }
+      #s2-title { top: 290px; }
+      #s2-phone { left: 390px; top: 450px; width: 300px; height: 540px; }
+      #s2-phone .glow { position: absolute; inset: 40px 20px; border-radius: 40px; background: radial-gradient(circle at 50% 45%, rgba(90, 200, 250, 0.35), transparent 65%); }
+      .card { position: absolute; left: 120px; right: 120px; height: 120px; border-radius: 30px; background: #111827; border: 2px solid var(--line);
+        display: flex; align-items: center; gap: 28px; padding: 0 36px; }
+      .card .dot { width: 56px; height: 56px; border-radius: 50%; flex: none; }
+      .card .t { font-size: 46px; font-weight: 700; }
+      #s2-card1 { top: 1030px; }
+      #s2-card2 { top: 1180px; }
+
+      /* scene 3 */
+      #s3-eyebrow { top: 210px; color: var(--red); }
+      #s3-title { top: 265px; font-size: 72px; }
+      #s3-phone { left: 390px; top: 470px; width: 300px; height: 620px; }
+      #s3-phone .scr { position: absolute; inset: 70px 22px 30px; border-radius: 36px; display: flex; align-items: center; justify-content: center; }
+      #s3-ring { position: absolute; left: 390px; top: 630px; width: 300px; height: 300px; border-radius: 50%; border: 6px solid var(--red); opacity: 0; }
+      .sensor { position: absolute; width: 310px; padding: 22px 24px; border-radius: 26px; background: #0e1420; border: 2px solid var(--line); opacity: 0.25; }
+      .sensor .n { font-size: 34px; font-weight: 700; line-height: 1.15; }
+      .sensor .d { font-size: 26px; font-weight: 400; color: var(--muted); margin-top: 8px; line-height: 1.25; }
+      .sensor .big { font-size: 64px; font-weight: 800; color: var(--amber); margin-top: 4px; }
+      #sn-acc { left: 45px; top: 470px; }
+      #sn-gyro { left: 725px; top: 470px; }
+      #sn-baro { left: 45px; top: 800px; }
+      #sn-gps { left: 725px; top: 800px; }
+      #sn-mic { left: 385px; top: 1140px; }
+
+      /* scene 4 */
+      #s4-phone { left: 240px; top: 230px; width: 600px; height: 1100px; }
+      #s4-alert { position: absolute; left: 40px; right: 40px; top: 110px; text-align: center; }
+      #s4-alert .ic { width: 110px; height: 110px; border-radius: 50%; background: var(--red); margin: 0 auto 28px; display: flex; align-items: center; justify-content: center;
+        font-size: 72px; font-weight: 800; }
+      #s4-alert .t { font-size: 50px; font-weight: 800; }
+      #s4-alert .d { font-size: 28px; color: var(--muted); margin-top: 14px; line-height: 1.35; }
+      #s4-count { position: absolute; left: 130px; top: 470px; width: 340px; height: 340px; }
+      #s4-count svg { position: absolute; inset: 0; }
+      .digit { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 140px; font-weight: 800; opacity: 0; }
+      #s4-note { position: absolute; left: 0; right: 0; top: 830px; text-align: center; font-size: 24px; color: var(--muted); }
+      #s4-btn { position: absolute; left: 50px; right: 50px; top: 900px; height: 110px; border-radius: 55px; background: #2a1012; border: 2px solid var(--red);
+        display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 700; color: var(--red); }
+      #s4-call { position: absolute; inset: 70px 30px 30px; border-radius: 40px; background: #07160b; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; opacity: 0; }
+      #s4-call .ic { width: 170px; height: 170px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; }
+      #s4-call .t { font-size: 54px; font-weight: 800; }
+      #s4-call .d { font-size: 30px; color: var(--muted); }
+
+      /* scene 5 */
+      #s5-eyebrow { top: 210px; }
+      #s5-title { top: 265px; font-size: 72px; }
+      #s5-map { position: absolute; left: 90px; top: 410px; width: 900px; height: 620px; border-radius: 40px; overflow: hidden; background: #0c1320; border: 2px solid var(--line); }
+      #s5-map .roads { position: absolute; inset: 0; opacity: 0.6;
+        background-image: linear-gradient(28deg, transparent 47%, #23324a 47%, #23324a 53%, transparent 53%), linear-gradient(-62deg, transparent 48%, #1c2a40 48%, #1c2a40 52%, transparent 52%),
+          linear-gradient(#152035 1px, transparent 1px), linear-gradient(90deg, #152035 1px, transparent 1px);
+        background-size: 900px 620px, 900px 620px, 60px 60px, 60px 60px; }
+      #s5-pulse { position: absolute; left: 380px; top: 210px; width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--red); opacity: 0; }
+      #s5-pin { position: absolute; left: 420px; top: 220px; width: 60px; height: 84px; }
+      #s5-coord { position: absolute; left: 0; right: 0; top: 440px; display: flex; justify-content: center; opacity: 0; }
+      #s5-coord span { font-size: 30px; font-weight: 600; padding: 14px 26px; border-radius: 20px; background: rgba(6, 8, 13, 0.85); border: 2px solid var(--line); }
+      #s5-lines { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      #s5-contacts-label { top: 1090px; font-size: 30px; font-weight: 700; letter-spacing: 0.12em; color: var(--muted); opacity: 0; }
+      .contact { position: absolute; top: 1160px; width: 150px; text-align: center; opacity: 0; }
+      .contact .av { width: 120px; height: 120px; margin: 0 auto; border-radius: 50%; background: #1b2436; border: 3px solid var(--blue);
+        display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: 800; }
+      .contact .ok { margin-top: 10px; font-size: 26px; font-weight: 700; color: var(--green); opacity: 0; }
+      #ct1 { left: 165px; } #ct2 { left: 465px; } #ct3 { left: 765px; }
+
+      /* scene 6 */
+      #s6-status { top: 220px; flex-direction: column; align-items: center; gap: 18px; }
+      #s6-status .t { font-size: 46px; font-weight: 700; color: var(--muted); }
+      #s6-orbit { position: absolute; left: 0; top: 380px; width: 1080px; height: 420px; }
+      #s6-sat { position: absolute; left: 0; top: 0; width: 170px; height: 120px; }
+      #s6-badge { top: 720px; opacity: 0; }
+      #s6-badge span { font-size: 44px; font-weight: 800; padding: 16px 34px; border-radius: 40px; background: rgba(90, 200, 250, 0.14); border: 2px solid var(--blue); color: var(--blue); }
+      #s6-q { position: absolute; left: 90px; right: 90px; top: 850px; opacity: 0; }
+      #s6-q .t { font-size: 38px; font-weight: 700; text-align: center; margin-bottom: 22px; }
+      #s6-q .opts { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+      #s6-q .opt { font-size: 30px; font-weight: 600; padding: 14px 26px; border-radius: 30px; background: #111827; border: 2px solid var(--line); }
+      #s6-guide { position: absolute; left: 420px; top: 1120px; width: 240px; height: 240px; opacity: 0; }
+      #s6-guide .ring { position: absolute; inset: 0; border-radius: 50%; border: 4px dashed #3a4152; }
+      #s6-guide .target { position: absolute; left: 90px; top: 90px; width: 60px; height: 60px; border-radius: 50%; border: 4px solid var(--green); }
+      #s6-gdot { position: absolute; left: 0; top: 0; width: 44px; height: 44px; border-radius: 50%; background: var(--blue); }
+      #s6-guide-label { position: absolute; left: -200px; right: -200px; top: -52px; text-align: center; font-size: 30px; font-weight: 700; color: var(--green); }
+
+      /* scene 7 */
+      #s7-eyebrow { top: 210px; color: var(--blue); }
+      #s7-title { top: 265px; font-size: 72px; }
+      #s7-svg { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .node { position: absolute; width: 320px; text-align: center; }
+      .node .ic { width: 150px; height: 150px; margin: 0 auto 14px; border-radius: 40px; background: #0e1420; border: 3px solid var(--line); display: flex; align-items: center; justify-content: center; }
+      .node .t { font-size: 32px; font-weight: 700; line-height: 1.2; }
+      #nd-sat { left: 380px; top: 400px; }
+      #nd-phone { left: 30px; top: 900px; }
+      #nd-ground { left: 730px; top: 900px; }
+      #nd-rescue { left: 380px; top: 1120px; }
+      #s7-pkt { position: absolute; left: 0; top: 0; width: 40px; height: 40px; border-radius: 50%; background: var(--amber); }
+      #s7-time { position: absolute; left: 240px; right: 240px; top: 640px; padding: 26px 0; border-radius: 40px; background: #06080d; border: 3px solid var(--amber); display: flex; flex-direction: column; align-items: center; opacity: 0; }
+      #s7-time .v { font-size: 100px; font-weight: 800; color: var(--amber); line-height: 1; }
+      #s7-time .d { font-size: 32px; font-weight: 600; color: var(--muted); margin-top: 8px; }
+
+      /* scene 8 */
+      #s8-a { top: 600px; font-size: 76px; font-weight: 700; color: var(--muted); }
+      #s8-b { top: 700px; font-size: 104px; font-weight: 800; letter-spacing: -0.02em; }
+      #s8-pills { top: 920px; gap: 22px; }
+      #s8-pills span { font-size: 36px; font-weight: 700; padding: 16px 30px; border-radius: 36px; border: 2px solid; }
+      #s8-foot { top: 1180px; padding: 0 120px; font-size: 28px; line-height: 1.4; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="70.5" data-width="1080" data-height="1920">
+      <!-- background -->
+      <div id="bg" class="clip" data-start="0" data-duration="70.5" data-track-index="0"><div class="grid"></div></div>
+
+      <!-- S1 hook -->
+      <section id="s1" class="clip" data-start="0" data-duration="6.3" data-track-index="1">
+        <div class="inner">
+          <div id="s1-crash" class="abs center-x">VA CHẠM</div>
+          <div id="s1-signal" class="abs center-x">
+            <svg width="260" height="220" viewBox="0 0 260 220">
+              <rect class="bar" x="10" y="160" width="44" height="60" rx="10" fill="#f5f6f8" />
+              <rect class="bar" x="76" y="110" width="44" height="110" rx="10" fill="#f5f6f8" />
+              <rect class="bar" x="142" y="60" width="44" height="160" rx="10" fill="#f5f6f8" />
+              <rect class="bar" x="208" y="10" width="44" height="210" rx="10" fill="#f5f6f8" />
+            </svg>
+          </div>
+          <div id="s1-signal-label" class="abs center-x">Không có sóng</div>
+          <div id="s1-q" class="abs center-x">Ai sẽ gọi cứu hộ?</div>
+          <div class="sub" data-scene="0"></div>
+          <div id="s1-flash"></div>
+        </div>
+      </section>
+
+      <!-- S2 intro -->
+      <section id="s2" class="clip" data-start="6.3" data-duration="7.7" data-track-index="1">
+        <div class="inner">
+          <div id="s2-eyebrow" class="abs center-x eyebrow">TÍNH NĂNG AN TOÀN</div>
+          <div id="s2-title" class="abs center-x h1">iPhone 16 Pro Max</div>
+          <div id="s2-phone" class="phone"><div class="glow"></div><div class="island"></div></div>
+          <div id="s2-card1" class="card"><div class="dot" style="background: var(--red)"></div><div class="t">Phát hiện va chạm</div></div>
+          <div id="s2-card2" class="card"><div class="dot" style="background: var(--blue)"></div><div class="t">SOS qua vệ tinh</div></div>
+          <div class="sub" data-scene="1"></div>
+        </div>
+      </section>
+
+      <!-- S3 sensors -->
+      <section id="s3" class="clip" data-start="14" data-duration="14.95" data-track-index="1">
+        <div class="inner">
+          <div id="s3-eyebrow" class="abs center-x eyebrow">PHÁT HIỆN VA CHẠM</div>
+          <div id="s3-title" class="abs center-x h1">5 cảm biến cùng lúc</div>
+          <div id="s3-ring"></div>
+          <div id="s3-phone" class="phone"><div class="island"></div><div class="scr" id="s3-scr"></div></div>
+          <div id="sn-acc" class="sensor"><div class="n">Gia tốc kế</div><div class="big">256G</div><div class="d">lực va chạm</div></div>
+          <div id="sn-gyro" class="sensor"><div class="n">Con quay hồi chuyển</div><div class="d">xoay, lật xe</div></div>
+          <div id="sn-baro" class="sensor"><div class="n">Khí áp kế</div><div class="d">áp suất đổi khi túi khí bung</div></div>
+          <div id="sn-gps" class="sensor"><div class="n">GPS</div><div class="d">tốc độ di chuyển</div></div>
+          <div id="sn-mic" class="sensor"><div class="n">Micrô</div><div class="d">tiếng va đập lớn</div></div>
+          <div class="sub" data-scene="2"></div>
+        </div>
+      </section>
+
+      <!-- S4 alert + countdown -->
+      <section id="s4" class="clip" data-start="28.95" data-duration="8.8" data-track-index="1">
+        <div class="inner">
+          <div id="s4-phone" class="phone">
+            <div class="island"></div>
+            <div id="s4-alert">
+              <div class="ic">!</div>
+              <div class="t">Phát hiện va chạm</div>
+              <div class="d">iPhone sẽ gọi cấp cứu nếu bạn không phản hồi</div>
+            </div>
+            <div id="s4-count">
+              <svg viewBox="0 0 340 340" width="340" height="340">
+                <circle cx="170" cy="170" r="150" fill="none" stroke="#2a1012" stroke-width="18" />
+                <circle id="s4-arc" cx="170" cy="170" r="150" fill="none" stroke="#ff453a" stroke-width="18" stroke-linecap="round"
+                  pathLength="1" stroke-dasharray="1" stroke-dashoffset="0" transform="rotate(-90 170 170)" />
+              </svg>
+              <div id="s4-digits"></div>
+            </div>
+            <div id="s4-note">minh hoạ · tua nhanh</div>
+            <div id="s4-btn">Gọi khẩn cấp</div>
+            <div id="s4-call">
+              <div class="ic">
+                <svg width="90" height="90" viewBox="0 0 24 24"><path fill="#06080d" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z" /></svg>
+              </div>
+              <div class="t">Đang gọi cấp cứu…</div>
+              <div class="d">Tự động sau 20 giây</div>
+            </div>
+          </div>
+          <div class="sub" data-scene="3"></div>
+        </div>
+      </section>
+
+      <!-- S5 location + contacts -->
+      <section id="s5" class="clip" data-start="37.75" data-duration="6.6" data-track-index="1">
+        <div class="inner">
+          <div id="s5-eyebrow" class="abs center-x eyebrow">CUỘC GỌI TỰ ĐỘNG</div>
+          <div id="s5-title" class="abs center-x h1">Gửi vị trí của bạn</div>
+          <div id="s5-map">
+            <div class="roads"></div>
+            <div id="s5-pulse"></div>
+            <svg id="s5-pin" viewBox="0 0 60 84"><path d="M30 0C13.4 0 0 13.4 0 30c0 22 30 54 30 54s30-32 30-54C60 13.4 46.6 0 30 0z" fill="#ff453a" /><circle cx="30" cy="30" r="11" fill="#06080d" /></svg>
+            <div id="s5-coord"><span>Vĩ độ · Kinh độ · Bán kính tìm kiếm</span></div>
+          </div>
+          <svg id="s5-lines" viewBox="0 0 1080 1920">
+            <path class="cl" d="M540 720 L240 1160" stroke="#5ac8fa" stroke-width="4" fill="none" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
+            <path class="cl" d="M540 720 L540 1160" stroke="#5ac8fa" stroke-width="4" fill="none" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
+            <path class="cl" d="M540 720 L840 1160" stroke="#5ac8fa" stroke-width="4" fill="none" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
+          </svg>
+          <div id="s5-contacts-label" class="abs center-x">LIÊN HỆ KHẨN CẤP</div>
+          <div id="ct1" class="contact"><div class="av">M</div><div class="ok">Đã báo</div></div>
+          <div id="ct2" class="contact"><div class="av">A</div><div class="ok">Đã báo</div></div>
+          <div id="ct3" class="contact"><div class="av">L</div><div class="ok">Đã báo</div></div>
+          <div class="sub" data-scene="4"></div>
+        </div>
+      </section>
+
+      <!-- S6 no signal -> satellite -->
+      <section id="s6" class="clip" data-start="44.35" data-duration="11.5" data-track-index="1">
+        <div class="inner">
+          <div id="s6-status" class="abs center-x">
+            <svg width="300" height="110" viewBox="0 0 300 110">
+              <rect x="10" y="80" width="26" height="28" rx="6" fill="#3a4152" />
+              <rect x="46" y="58" width="26" height="50" rx="6" fill="#3a4152" />
+              <rect x="82" y="34" width="26" height="74" rx="6" fill="#3a4152" />
+              <rect x="118" y="10" width="26" height="98" rx="6" fill="#3a4152" />
+              <path d="M180 50a80 80 0 0 1 110 0M198 70a52 52 0 0 1 74 0M218 90a24 24 0 0 1 34 0" stroke="#3a4152" stroke-width="10" fill="none" stroke-linecap="round" />
+              <line id="s6-x" x1="0" y1="105" x2="300" y2="5" stroke="#ff453a" stroke-width="10" stroke-linecap="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
+            </svg>
+            <div class="t">Không sóng di động · Không Wi-Fi</div>
+          </div>
+          <svg id="s6-orbit" data-layout-allow-overflow viewBox="0 0 1080 420">
+            <path d="M-40 380 Q540 -120 1120 380" stroke="#2a3a55" stroke-width="3" stroke-dasharray="12 14" fill="none" />
+          </svg>
+          <svg id="s6-sat" viewBox="0 0 170 120">
+            <rect x="0" y="40" width="55" height="40" rx="4" fill="#1f4f7a" stroke="#5ac8fa" stroke-width="3" />
+            <rect x="115" y="40" width="55" height="40" rx="4" fill="#1f4f7a" stroke="#5ac8fa" stroke-width="3" />
+            <rect x="60" y="30" width="50" height="60" rx="10" fill="#d9dee7" />
+            <line x1="55" y1="60" x2="60" y2="60" stroke="#d9dee7" stroke-width="4" />
+            <line x1="110" y1="60" x2="115" y2="60" stroke="#d9dee7" stroke-width="4" />
+            <circle cx="85" cy="100" r="9" fill="#5ac8fa" />
+          </svg>
+          <div id="s6-badge" class="abs center-x"><span>SOS qua vệ tinh</span></div>
+          <div id="s6-q">
+            <div class="t">Chuyện gì đang xảy ra?</div>
+            <div class="opts">
+              <div class="opt" id="s6-opt-car">Xe cộ</div>
+              <div class="opt">Ốm / bị thương</div>
+              <div class="opt">Lạc / mắc kẹt</div>
+              <div class="opt">Hoả hoạn</div>
+            </div>
+          </div>
+          <div id="s6-guide">
+            <div id="s6-guide-label">Hướng máy về phía vệ tinh</div>
+            <div class="ring"></div>
+            <div class="target"></div>
+            <div id="s6-gdot"></div>
+          </div>
+          <div class="sub" data-scene="5"></div>
+        </div>
+      </section>
+
+      <!-- S7 message relay -->
+      <section id="s7" class="clip" data-start="55.85" data-duration="8.6" data-track-index="1">
+        <div class="inner">
+          <div id="s7-eyebrow" class="abs center-x eyebrow">TIN NHẮN QUA VỆ TINH</div>
+          <div id="s7-title" class="abs center-x h1">Từ máy đến cứu hộ</div>
+          <svg id="s7-svg" viewBox="0 0 1080 1920">
+            <path id="s7-l1" d="M190 900 L540 560" stroke="#5ac8fa" stroke-width="5" fill="none" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
+            <path id="s7-l2" d="M540 560 L890 900" stroke="#5ac8fa" stroke-width="5" fill="none" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
+            <path id="s7-l3" d="M890 1060 L670 1190" stroke="#32d74b" stroke-width="5" fill="none" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" />
+          </svg>
+          <div id="nd-sat" class="node">
+            <div class="ic"><svg width="110" height="80" viewBox="0 0 170 120"><rect x="0" y="40" width="55" height="40" rx="4" fill="#1f4f7a" stroke="#5ac8fa" stroke-width="4" /><rect x="115" y="40" width="55" height="40" rx="4" fill="#1f4f7a" stroke="#5ac8fa" stroke-width="4" /><rect x="60" y="30" width="50" height="60" rx="10" fill="#d9dee7" /></svg></div>
+            <div class="t">Vệ tinh</div>
+          </div>
+          <div id="nd-phone" class="node">
+            <div class="ic"><svg width="60" height="100" viewBox="0 0 60 100"><rect x="3" y="3" width="54" height="94" rx="14" fill="none" stroke="#f5f6f8" stroke-width="5" /><rect x="20" y="10" width="20" height="6" rx="3" fill="#f5f6f8" /></svg></div>
+            <div class="t">iPhone của bạn</div>
+          </div>
+          <div id="nd-ground" class="node">
+            <div class="ic"><svg width="100" height="100" viewBox="0 0 100 100"><path d="M20 30a40 40 0 0 0 50 50z" fill="none" stroke="#f5f6f8" stroke-width="5" /><line x1="45" y1="55" x2="75" y2="25" stroke="#f5f6f8" stroke-width="5" /><circle cx="78" cy="22" r="7" fill="#5ac8fa" /><line x1="40" y1="80" x2="30" y2="96" stroke="#f5f6f8" stroke-width="5" /></svg></div>
+            <div class="t">Trạm mặt đất</div>
+          </div>
+          <div id="nd-rescue" class="node">
+            <div class="ic" style="border-color: #32d74b"><svg width="90" height="90" viewBox="0 0 90 90"><rect x="33" y="10" width="24" height="70" rx="4" fill="#32d74b" /><rect x="10" y="33" width="70" height="24" rx="4" fill="#32d74b" /></svg></div>
+            <div class="t">Trung tâm cứu hộ</div>
+          </div>
+          <div id="s7-time"><div class="v">~15 giây</div><div class="d">khi trời quang</div></div>
+          <div id="s7-pkt"></div>
+          <div class="sub" data-scene="6"></div>
+        </div>
+      </section>
+
+      <!-- S8 close -->
+      <section id="s8" class="clip" data-start="64.45" data-duration="6.05" data-track-index="1">
+        <div class="inner">
+          <div id="s8-a" class="abs center-x">Khi bạn không thể gọi,</div>
+          <div id="s8-b" class="abs center-x">iPhone gọi thay bạn.</div>
+          <div id="s8-pills" class="abs center-x">
+            <span style="color: var(--red); border-color: var(--red)">Phát hiện va chạm</span>
+            <span style="color: var(--blue); border-color: var(--blue)">SOS qua vệ tinh</span>
+          </div>
+          <div id="s8-foot" class="abs center-x">SOS qua vệ tinh chỉ có tại các quốc gia và vùng lãnh thổ được hỗ trợ. Hình ảnh mang tính minh hoạ.</div>
+        </div>
+      </section>
+
+      <!-- audio: voiceover -->
+      <audio id="vo1" src="assets/audio/vo/vo1.wav" data-start="0.3" data-duration="5.55" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo2" src="assets/audio/vo/vo2.wav" data-start="6.6" data-duration="6.96" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo3" src="assets/audio/vo/vo3.wav" data-start="14.3" data-duration="14.2" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo4" src="assets/audio/vo/vo4.wav" data-start="29.25" data-duration="8.03" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo5" src="assets/audio/vo/vo5.wav" data-start="38.05" data-duration="5.85" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo6" src="assets/audio/vo/vo6.wav" data-start="44.65" data-duration="10.75" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo7" src="assets/audio/vo/vo7.wav" data-start="56.15" data-duration="7.83" data-track-index="10" data-volume="1"></audio>
+      <audio id="vo8" src="assets/audio/vo/vo8.wav" data-start="64.75" data-duration="3.08" data-track-index="10" data-volume="1"></audio>
+      <!-- audio: music bed -->
+      <audio id="bgm" src="assets/audio/bgm.wav" data-start="0" data-duration="70.5" data-track-index="11" data-volume="0.3"></audio>
+      <!-- audio: sfx -->
+      <audio id="sfx-impact" src="assets/audio/sfx_impact.wav" data-start="0.3" data-duration="1.2" data-track-index="12" data-volume="0.9"></audio>
+      <audio id="sfx-beep1" src="assets/audio/sfx_beep.wav" data-start="33.2" data-duration="0.12" data-track-index="12"></audio>
+      <audio id="sfx-beep2" src="assets/audio/sfx_beep.wav" data-start="33.7" data-duration="0.12" data-track-index="12"></audio>
+      <audio id="sfx-beep3" src="assets/audio/sfx_beep.wav" data-start="34.2" data-duration="0.12" data-track-index="12"></audio>
+      <audio id="sfx-beep4" src="assets/audio/sfx_beep.wav" data-start="34.7" data-duration="0.12" data-track-index="12"></audio>
+      <audio id="sfx-beep5" src="assets/audio/sfx_beep.wav" data-start="35.2" data-duration="0.12" data-track-index="12"></audio>
+      <audio id="sfx-ring" src="assets/audio/sfx_ring.wav" data-start="35.95" data-duration="1.6" data-track-index="12"></audio>
+      <audio id="sfx-ping1" src="assets/audio/sfx_ping.wav" data-start="47.64" data-duration="0.9" data-track-index="12"></audio>
+      <audio id="sfx-ping2" src="assets/audio/sfx_ping.wav" data-start="53.6" data-duration="0.9" data-track-index="12"></audio>
+      <audio id="sfx-whoosh1" src="assets/audio/sfx_whoosh.wav" data-start="56.15" data-duration="1.6" data-track-index="12"></audio>
+      <audio id="sfx-whoosh2" src="assets/audio/sfx_whoosh.wav" data-start="58.76" data-duration="1.6" data-track-index="12"></audio>
+      <audio id="sfx-chime" src="assets/audio/sfx_chime.wav" data-start="66.46" data-duration="2.5" data-track-index="12"></audio>
+    </div>
+
+    <script>
+      // Scene starts / voiceover lengths (seconds) — voiceover begins 0.3s into each scene.
+      const S = [0, 6.3, 14.0, 28.95, 37.75, 44.35, 55.85, 64.45];
+      const D = [6.3, 7.7, 14.95, 8.8, 6.6, 11.5, 8.6, 6.05];
+      const VO = [5.55, 6.96, 14.2, 8.03, 5.85, 10.75, 7.83, 3.08];
+      const SUBS = [
+        ["Một vụ tai nạn.", "Bạn bất tỉnh.", "Xung quanh không có sóng.", "Ai sẽ gọi cứu hộ?"],
+        ["iPhone 16 Pro Max có hai tính năng", "cho đúng khoảnh khắc đó:", "Phát hiện va chạm,", "và SOS qua vệ tinh."],
+        ["Khi có va chạm mạnh,", "iPhone kết hợp nhiều cảm biến:", "gia tốc kế đo lực tới 256G,", "con quay hồi chuyển,", "khí áp kế nhận ra áp suất thay đổi", "khi túi khí bung,", "GPS đo tốc độ,", "và micrô nghe tiếng va đập."],
+        ["Nếu xác định đây là tai nạn nghiêm trọng,", "màn hình hiện cảnh báo", "và đếm ngược 20 giây.", "Bạn không phản hồi,", "iPhone tự gọi cấp cứu."],
+        ["Tổng đài nhận được tin nhắn thoại", "báo vị trí của bạn,", "và các liên hệ khẩn cấp", "cũng được thông báo."],
+        ["Nhưng nếu không có sóng di động hay Wi-Fi?", "iPhone chuyển sang SOS qua vệ tinh.", "Bạn trả lời vài câu hỏi nhanh,", "rồi màn hình chỉ hướng", "để bạn hướng máy về phía vệ tinh."],
+        ["Tin nhắn được nén, gửi lên vệ tinh,", "rồi chuyển tới trung tâm cứu hộ kèm vị trí.", "Trời quang,", "chỉ mất khoảng 15 giây."],
+        ["Khi bạn không thể gọi,", "iPhone gọi thay bạn."],
+      ];
+      // Spoken word counts per chunk (matches the voiceover phrasing), used to time each chunk.
+      const WORDS = [[4, 3, 5, 5], [8, 5, 4, 5], [5, 6, 7, 4, 7, 4, 4, 6], [9, 5, 6, 4, 5], [7, 4, 5, 4], [10, 7, 6, 5, 8], [8, 9, 2, 5], [5, 4]];
+      const CUE = WORDS.map((w, i) => {
+        const total = w.reduce((a, b) => a + b, 0);
+        let acc = 0;
+        return w.map((n) => { const t = S[i] + 0.3 + (VO[i] * acc) / total; acc += n; return t; });
+      });
+      const C = (i, k) => CUE[i][k];
+      const T = (i, t) => S[i] + t;
+
+      // Build subtitle lines (static DOM, built once before the timeline).
+      document.querySelectorAll(".sub").forEach((box) => {
+        const i = Number(box.dataset.scene);
+        SUBS[i].forEach((txt, k) => {
+          const line = document.createElement("div");
+          line.className = "subline";
+          line.id = `sub-${i}-${k}`;
+          const span = document.createElement("span");
+          span.textContent = txt;
+          line.appendChild(span);
+          box.appendChild(line);
+        });
+      });
+
+      // Countdown digits 20 → 0
+      const digits = document.getElementById("s4-digits");
+      for (let n = 20; n >= 0; n--) {
+        const d = document.createElement("div");
+        d.className = "digit";
+        d.id = `dg-${n}`;
+        d.textContent = String(n);
+        digits.appendChild(d);
+      }
+
+      const tl = gsap.timeline({ paused: true });
+
+      // Scene fades + subtitles
+      ["#s1", "#s2", "#s3", "#s4", "#s5", "#s6", "#s7", "#s8"].forEach((id, i) => {
+        tl.fromTo(`${id} .inner`, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power1.out" }, S[i]);
+        if (i < 7) tl.to(`${id} .inner`, { opacity: 0, duration: 0.3, ease: "power1.in" }, S[i] + D[i] - 0.3);
+        if (i === 7) return;
+        SUBS[i].forEach((_, k) => {
+          const on = C(i, k);
+          const off = k + 1 < SUBS[i].length ? C(i, k + 1) : S[i] + D[i] - 0.3;
+          tl.fromTo(`#sub-${i}-${k}`, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.18, ease: "power2.out" }, on);
+          tl.to(`#sub-${i}-${k}`, { opacity: 0, duration: 0.12 }, off - 0.12);
+        });
+      });
+
+      // S1 — impact, blackout, no signal, question
+      tl.fromTo("#s1-flash", { opacity: 0 }, { opacity: 0.95, duration: 0.06 }, C(0, 0));
+      tl.to("#s1-flash", { opacity: 0, duration: 0.5, ease: "power2.out" }, C(0, 0) + 0.06);
+      tl.fromTo("#s1-crash", { scale: 1.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: "power3.out" }, C(0, 0));
+      tl.fromTo("#s1-crash", { x: 0 }, { keyframes: { x: [0, -26, 22, -16, 12, -6, 0] }, duration: 0.5, ease: "none" }, C(0, 0) + 0.05);
+      tl.to("#s1-crash", { opacity: 0.25, duration: 0.6 }, C(0, 1));
+      tl.fromTo("#s1-signal", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3 }, C(0, 2) - 0.4);
+      tl.to("#s1-signal .bar", { fill: "#2a3140", duration: 0.15, stagger: { each: 0.18, from: "end" } }, C(0, 2));
+      tl.fromTo("#s1-signal-label", { opacity: 0 }, { opacity: 1, duration: 0.3 }, C(0, 2) + 0.6);
+      tl.fromTo("#s1-q", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, C(0, 3));
+
+      // S2 — title, phone, two feature cards
+      tl.fromTo("#s2-eyebrow", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4 }, C(1, 0));
+      tl.fromTo("#s2-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, C(1, 0) + 0.15);
+      tl.fromTo("#s2-phone", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, C(1, 0) + 0.4);
+      tl.fromTo("#s2-phone .glow", { opacity: 0.3 }, { opacity: 1, duration: 1.2, repeat: 4, yoyo: true, ease: "sine.inOut" }, C(1, 1));
+      tl.fromTo("#s2-card1", { opacity: 0, x: -80 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, C(1, 2));
+      tl.fromTo("#s2-card2", { opacity: 0, x: 80 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, C(1, 3));
+
+      // S3 — phone + five sensors light up in sync with the narration
+      tl.fromTo("#s3-eyebrow", { opacity: 0 }, { opacity: 1, duration: 0.4 }, C(2, 0));
+      tl.fromTo("#s3-title", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45 }, C(2, 0) + 0.1);
+      tl.fromTo("#s3-phone", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }, C(2, 0));
+      tl.fromTo("#s3-ring", { opacity: 0.9, scale: 0.6 }, { opacity: 0, scale: 1.8, duration: 1.2, ease: "power2.out" }, C(2, 0) + 0.3);
+      tl.fromTo("#s3-ring", { opacity: 0.9, scale: 0.6 }, { opacity: 0, scale: 1.8, duration: 1.2, ease: "power2.out", immediateRender: false }, C(2, 1));
+      const lightUp = (sel, at, color) => {
+        tl.to(sel, { opacity: 1, borderColor: color, backgroundColor: "#141c2c", duration: 0.3, ease: "power2.out" }, at);
+        tl.fromTo(sel, { scale: 1 }, { keyframes: { scale: [1, 1.08, 1] }, duration: 0.45, ease: "power2.out" }, at);
+        tl.fromTo("#s3-scr", { backgroundColor: "rgba(255,69,58,0)" }, { keyframes: { backgroundColor: ["rgba(255,69,58,0)", "rgba(255,69,58,0.35)", "rgba(255,69,58,0.08)"] }, duration: 0.6, immediateRender: false }, at);
+      };
+      lightUp("#sn-acc", C(2, 2), "#ffd60a");
+      tl.fromTo("#sn-acc .big", { scale: 0.6 }, { scale: 1, duration: 0.5, ease: "back.out(2.5)" }, C(2, 2) + 0.4);
+      lightUp("#sn-gyro", C(2, 3), "#5ac8fa");
+      lightUp("#sn-baro", C(2, 4), "#5ac8fa");
+      lightUp("#sn-gps", C(2, 6), "#5ac8fa");
+      lightUp("#sn-mic", C(2, 7), "#5ac8fa");
+
+      // S4 — crash alert, 20s countdown (sped up), automatic call
+      tl.fromTo("#s4-phone", { opacity: 0, y: 120 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, C(3, 0));
+      tl.fromTo("#s4-alert", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4 }, C(3, 1));
+      tl.fromTo("#s4-alert .ic", { scale: 1 }, { scale: 1.12, duration: 0.4, repeat: 5, yoyo: true, ease: "sine.inOut" }, C(3, 1));
+      tl.fromTo("#s4-count", { opacity: 0 }, { opacity: 1, duration: 0.3 }, C(3, 1) + 0.3);
+      tl.fromTo("#s4-btn", { opacity: 0 }, { opacity: 1, duration: 0.3 }, C(3, 1) + 0.5);
+      tl.fromTo("#s4-note", { opacity: 0 }, { opacity: 1, duration: 0.3 }, C(3, 2));
+      tl.set("#dg-20", { opacity: 1 }, C(3, 1) + 0.3);
+      const cdStart = C(3, 2), cdEnd = C(3, 4) - 0.1, step = (cdEnd - cdStart) / 20;
+      tl.fromTo("#s4-arc", { attr: { "stroke-dashoffset": 0 } }, { attr: { "stroke-dashoffset": 1 }, duration: cdEnd - cdStart, ease: "none" }, cdStart);
+      for (let n = 19; n >= 0; n--) {
+        const at = cdStart + step * (20 - n);
+        tl.set(`#dg-${n + 1}`, { opacity: 0 }, at);
+        tl.set(`#dg-${n}`, { opacity: 1 }, at);
+      }
+      tl.to(["#s4-alert", "#s4-count", "#s4-note", "#s4-btn"], { opacity: 0, duration: 0.25 }, C(3, 4) - 0.05);
+      tl.fromTo("#s4-call", { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.4, ease: "power2.out" }, C(3, 4));
+      tl.fromTo("#s4-call .ic", { scale: 1 }, { scale: 1.1, duration: 0.45, repeat: 3, yoyo: true, ease: "sine.inOut" }, C(3, 4) + 0.3);
+
+      // S5 — location pin, coordinates, emergency contacts
+      tl.fromTo("#s5-eyebrow", { opacity: 0 }, { opacity: 1, duration: 0.4 }, C(4, 0));
+      tl.fromTo("#s5-title", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45 }, C(4, 0) + 0.1);
+      tl.fromTo("#s5-map", { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.5 }, C(4, 0));
+      tl.fromTo("#s5-pin", { y: -160, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "bounce.out" }, C(4, 0) + 0.3);
+      tl.fromTo("#s5-pulse", { opacity: 0.9, scale: 0.4 }, { opacity: 0, scale: 2.2, duration: 1.3, repeat: 3, ease: "power2.out" }, C(4, 0) + 0.9);
+      tl.fromTo("#s5-coord", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4 }, C(4, 1));
+      tl.fromTo("#s5-contacts-label", { opacity: 0 }, { opacity: 1, duration: 0.3 }, C(4, 2));
+      tl.to("#s5-lines .cl", { attr: { "stroke-dashoffset": 0 }, duration: 0.5, stagger: 0.15, ease: "power2.out" }, C(4, 2));
+      tl.fromTo(".contact", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.15, ease: "power3.out" }, C(4, 2) + 0.3);
+      tl.fromTo(".contact .ok", { opacity: 0 }, { opacity: 1, duration: 0.3, stagger: 0.15 }, C(4, 3));
+
+      // S6 — no signal, satellite arrives, questionnaire, pointing guide
+      tl.fromTo("#s6-status", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4 }, C(5, 0));
+      tl.to("#s6-x", { attr: { "stroke-dashoffset": 0 }, duration: 0.4, ease: "power2.out" }, C(5, 0) + 0.6);
+      tl.fromTo("#s6-orbit", { opacity: 0 }, { opacity: 1, duration: 0.5 }, C(5, 1) - 0.3);
+      tl.fromTo("#s6-sat", { x: 980, y: 440 }, { x: 455, y: 450, duration: 1.4, ease: "power3.out" }, C(5, 1) - 0.4);
+      tl.to("#s6-sat", { y: 435, duration: 1.6, repeat: 3, yoyo: true, ease: "sine.inOut" }, C(5, 1) + 1.0);
+      tl.fromTo("#s6-badge", { opacity: 0, scale: 0.85 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, C(5, 1) + 0.3);
+      tl.fromTo("#s6-q", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.4 }, C(5, 2));
+      tl.to("#s6-opt-car", { backgroundColor: "#2a1012", borderColor: "#ff453a", color: "#ff453a", duration: 0.25 }, C(5, 2) + 0.9);
+      tl.to("#s6-q", { opacity: 0.35, duration: 0.3 }, C(5, 3));
+      tl.fromTo("#s6-guide", { opacity: 0 }, { opacity: 1, duration: 0.4 }, C(5, 3));
+      tl.fromTo("#s6-gdot", { x: 20, y: 40 }, { x: 98, y: 98, duration: C(5, 4) + 1.4 - C(5, 3), ease: "power2.inOut" }, C(5, 3) + 0.3);
+      tl.to("#s6-gdot", { backgroundColor: "#32d74b", duration: 0.2 }, C(5, 4) + 1.6);
+      tl.fromTo("#s6-guide .target", { scale: 1 }, { scale: 1.5, opacity: 0.4, duration: 0.5, ease: "power2.out" }, C(5, 4) + 1.6);
+
+      // S7 — packet travels phone → satellite → ground station → rescue
+      tl.fromTo("#s7-eyebrow", { opacity: 0 }, { opacity: 1, duration: 0.4 }, C(6, 0));
+      tl.fromTo("#s7-title", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45 }, C(6, 0) + 0.1);
+      tl.fromTo(".node", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.12 }, C(6, 0));
+      tl.fromTo("#s7-pkt", { opacity: 0, x: 170, y: 880 }, { opacity: 1, duration: 0.2 }, C(6, 0) + 0.5);
+      tl.to("#s7-l1", { attr: { "stroke-dashoffset": 0 }, duration: 1.6, ease: "power1.inOut" }, C(6, 0) + 0.6);
+      tl.to("#s7-pkt", { x: 520, y: 540, duration: 1.6, ease: "power1.inOut" }, C(6, 0) + 0.6);
+      tl.to("#s7-l2", { attr: { "stroke-dashoffset": 0 }, duration: 1.4, ease: "power1.inOut" }, C(6, 1));
+      tl.to("#s7-pkt", { x: 870, y: 880, duration: 1.4, ease: "power1.inOut" }, C(6, 1));
+      tl.to("#s7-l3", { attr: { "stroke-dashoffset": 0 }, duration: 0.9, ease: "power1.inOut" }, C(6, 1) + 1.5);
+      tl.to("#s7-pkt", { x: 650, y: 1170, backgroundColor: "#32d74b", duration: 0.9, ease: "power1.inOut" }, C(6, 1) + 1.5);
+      tl.to("#nd-rescue .ic", { backgroundColor: "#0b2312", duration: 0.3 }, C(6, 1) + 2.4);
+      tl.fromTo("#s7-time", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2)" }, C(6, 2));
+
+      // S8 — closing line
+      tl.fromTo("#s8-a", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, C(7, 0));
+      tl.fromTo("#s8-b", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, C(7, 1));
+      tl.fromTo("#s8-pills", { opacity: 0 }, { opacity: 1, duration: 0.5 }, C(7, 1) + 0.8);
+      tl.fromTo("#s8-foot", { opacity: 0 }, { opacity: 1, duration: 0.5 }, C(7, 1) + 1.3);
+
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
